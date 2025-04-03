@@ -1,6 +1,8 @@
-| Name             | Exercise |
-|------------------| ---------|
-| Emmanuel Adedeji | x x x    |
-| Eelis Kuisma     | x - -    |
-| Miska Turpeinen  | - x -    |
-| Nam Vu           | - x x    |
+#Exercise 1
+
+| Name             | Done  |
+|------------------| ------|
+| Emmanuel Adedeji | - - - |
+| Eelis Kuisma     | - - - |
+| Miska Turpeinen  | - - - |
+| Nam Vu           | - - - |

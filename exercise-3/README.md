@@ -4,5 +4,5 @@
 |------------------| ------|
 | Emmanuel Adedeji | x x x |
 | Eelis Kuisma     | - - - |
-| Miska Turpeinen  | - - - |
+| Miska Turpeinen  | x x x |
 | Nam Vu           | - - - |

@@ -2,7 +2,7 @@
 
 | Name             | Done  |
 |------------------| ------|
-| Emmanuel Adedeji | - - - |
-| Eelis Kuisma     | - - - |
+| Emmanuel Adedeji | x x x |
+| Eelis Kuisma     | x x x |
 | Miska Turpeinen  | x x x |
-| Nam Vu           | - - - |
+| Nam Vu           | x x x |

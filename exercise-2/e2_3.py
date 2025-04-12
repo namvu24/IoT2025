@@ -18,12 +18,13 @@ i2c=I2C(0,scl=Pin(17),sda=Pin(16),freq=200000)
 display = SSD1306_I2C(WIDTH,HEIGHT,i2c)
 fbuf = framebuf.FrameBuffer(bytearray(WIDTH * HEIGHT * 1), WIDTH, HEIGHT, framebuf.MONO_VLSB)
 button = Pin(15, Pin.IN, Pin.PULL_UP)
-s = 1 # the status of the button
+previous_button_state = 1 # the status of the button
+
 
 while True:
-    if button.value() != s:
-        s = button.value()
-        if s == 0:
+    if button.value() != previous_button_state:
+        previous_button_state = button.value()
+        if button.value() == 0:
             display.fill(0)
             fbuf.fill(0)
             fbuf.rect(rect_x, rect_y, rect_size, rect_size, 1)
@@ -31,4 +32,3 @@ while True:
                 fbuf.ellipse(int(rect_x + i[0]/4*rect_size), int(rect_y + i[1]/4*rect_size), circle_radius, circle_radius, 1, True)
             display.blit(fbuf, 0, 0, 0)
             display.show()
-    time.sleep(0.1)

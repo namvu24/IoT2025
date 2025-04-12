@@ -5,7 +5,7 @@ import time
 
 WIDTH =128
 HEIGHT= 64
-name = "Eelis Kuisma"
+name = "My Name Here"
 name_width = len(name) * 8
 name_height = 8
 name_x = int((WIDTH - name_width) / 2)
@@ -19,13 +19,12 @@ display = SSD1306_I2C(WIDTH,HEIGHT,i2c)
 fbuf = framebuf.FrameBuffer(bytearray(WIDTH * HEIGHT * 1), WIDTH, HEIGHT, framebuf.MONO_VLSB)
 
 button = Pin(15, Pin.IN, Pin.PULL_UP)
-s = 1 # the status of the button
+previous_button_state = 1 # the status of the button
 while True:
-    if button.value() != s:
-        s = button.value()
-        if s == 0:
+    if button.value() != previous_button_state:
+        previous_button_state = button.value()
+        if previous_button_state == 0:
             display.fill(0)
             fbuf.text(name, name_x, name_y)
             display.blit(fbuf, 0, 0, 0)
             display.show()
-    time.sleep(0.1)

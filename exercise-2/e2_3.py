@@ -32,3 +32,4 @@ while True:
                 fbuf.ellipse(int(rect_x + i[0]/4*rect_size), int(rect_y + i[1]/4*rect_size), circle_radius, circle_radius, 1, True)
             display.blit(fbuf, 0, 0, 0)
             display.show()
+        time.sleep(0.1)

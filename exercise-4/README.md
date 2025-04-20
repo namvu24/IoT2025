@@ -3,6 +3,6 @@
 | Name             | Done  |
 |------------------| ------|
 | Emmanuel Adedeji | x x x |
-| Eelis Kuisma     | - - - |
+| Eelis Kuisma     | x x x |
 | Miska Turpeinen  | - - - |
 | Nam Vu           | - - - |

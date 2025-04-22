@@ -5,16 +5,10 @@ import ssl
 import time
 import network
 import ujson
-import config
 
-CONNECT_WIFI = False
-
-# Credentials from config.py
-SSID = config.SSID
-PASSWORD = config.PASSWORD
-IOT_HUB_HOSTNAME = config.IOT_HUB_HOSTNAME
-DEVICE_ID = config.DEVICE_ID
-SAS_TOKEN = config.SAS_TOKEN
+# WIFI CREDENTIALS
+SSID = "WIFI_SSID"
+PASSWORD = "WIFI_PWD"
 
 # INIT CONSTANTS
 WIDTH = 128
@@ -27,10 +21,9 @@ oled = SSD1306_I2C(WIDTH, HEIGHT, i2c)
 soil_sensor = ADC(Pin(28))
 
 # Azure IoT Hub Configuration
-MQTT_CLIENT_ID = DEVICE_ID
-MQTT_USERNAME = f"{IOT_HUB_HOSTNAME}/{DEVICE_ID}/?api-version=2021-04-12"
-MQTT_PASSWORD = SAS_TOKEN
-MQTT_TOPIC = f"devices/{DEVICE_ID}/messages/events/"
+MQTT_HOSTNAME = "broker.emqx.io"
+MQTT_TOPIC_SOIL = f"womm/soil_moisture"
+MQTT_TOPIC_PUMP = f"womm/pump_operation"
 
 # Function to connect to WLAN
 def connect_wlan():
@@ -53,21 +46,12 @@ def connect_wlan():
     oled.text(wlan.ifconfig()[0], 0, 20)
     oled.show()
 
-# Connect to Azure IoT Hub using MQTT
+# Connect to MQTT broker
 def connect_mqtt():
     try:
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        context.verify_mode = ssl.CERT_NONE
-        client = MQTTClient(
-            client_id=MQTT_CLIENT_ID,
-            server=IOT_HUB_HOSTNAME,
-            port=8883,
-            user=MQTT_USERNAME,
-            password=MQTT_PASSWORD,
-            ssl=context
-        )
-        client.connect()
-        print("Connected to Azure IoT Hub")
+        client = MQTTClient("pico_client_" + str(time.ticks_ms()), MQTT_HOSTNAME, 1883)
+        client.connect(clean_session=True)
+        print(f"Connecting to {MQTT_HOSTNAME}")
         return client
     except Exception as e:
         print(f"Error connecting to MQTT: {e}")
@@ -77,9 +61,17 @@ def connect_mqtt():
 def publish_moisture(client, moisture):
     try:
         payload = ujson.dumps({"moisture": moisture, "timestamp": time.time()})
-        if CONNECT_WIFI:
-            client.publish(MQTT_TOPIC, payload.encode('utf-8'))
-        print(f"Published: {payload} to {MQTT_TOPIC}")
+        client.publish(MQTT_TOPIC_SOIL, payload.encode('utf-8'))
+        print(f"Published: {payload} to {MQTT_TOPIC_SOIL}")
+    except Exception as e:
+        print(f"Error publishing message: {e}")
+
+# Publish a Message
+def publish_pump(client, time_in_sec):
+    try:
+        payload = ujson.dumps({"running_time": time_in_sec, "timestamp": time.time()})
+        client.publish(MQTT_TOPIC_PUMP, payload.encode('utf-8'))
+        print(f"Published: {payload} to {MQTT_TOPIC_PUMP}")
     except Exception as e:
         print(f"Error publishing message: {e}")
 
@@ -96,27 +88,25 @@ def get_moisture():
 
 # Main
 if __name__ == "__main__":
-    wlan = None
-    mqtt_client = None
+    wlan = connect_wlan()
+    mqtt_client = connect_mqtt()
     
-    if CONNECT_WIFI:
-        wlan = connect_wlan()
-        mqtt_client = connect_mqtt()
-    else:
-        print("OFFLINE MODE.")
+    if mqtt_client is None:
+        print("Unable to connect to MQTT")
+        exit()
 
-    try:
-        while True:
-            soil_moisture = get_moisture()
-            print(soil_moisture)
-            oled.fill(0)
-            oled.text(f"Moisture data", 0, 0)
-            oled.text(f"{soil_moisture}", 0, 20)
-            oled.show()
-            publish_moisture(mqtt_client, soil_moisture)
-            time.sleep(1)  # Send data every 5 seconds
-    except KeyboardInterrupt:
-        print("Exiting...")
-    finally:
-        mqtt_client.disconnect()
-        wlan.disconnect()
+    plant_1_threshold = input("plant 1 moisture: ")
+    pump_run_time = input("pump run time: ")
+
+    while True:
+        soil_moisture = get_moisture()
+        print(soil_moisture)
+        oled.fill(0)
+        oled.text(f"Moisture data", 0, 0)
+        oled.text(f"{soil_moisture}", 0, 20)
+        oled.show()
+        publish_moisture(mqtt_client, soil_moisture)
+        if soil_moisture <= float(plant_1_threshold):
+            #start_pump(time=pump_run_time)
+            publish_pump(mqtt_client, pump_run_time)
+        time.sleep(5)  # Send data every 5 seconds

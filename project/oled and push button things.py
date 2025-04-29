@@ -2,17 +2,20 @@
 
 # The user can set three things using the OLED display and button:
 # 1. Set soil moisture level - tell the program what's the desired level.
-# 2. Set watering threshold - if the moisture is below the threshold, the pump starts.
+# 2. Set watering threshold - if the moisture is below the threshold, the pump starts (automatically).
 # - The moisture is measured as 2 mins average.
-# - If you set it to "auto", the program automatically calculates 90 % of the desired level
+# - If you set the threshold to "auto", the program automatically calculates 90 % of the desired level to be the threshold
 # 3. Set pump run time - how long the pump should run once its started.
-# - If you set it to "auto", the program automatically increases or decreases the running time,
-#   if it detects that there's too much or too little moisture after running the pump.
+# - If you set it to "auto", the program first sets it to 1.0 s. Then after every time the pump has run, 
+#   it measures if there's too much or too little moisture (compared to the desired level) after running the pump. Then it automatically increases
+#  the pump running time (1.0 -> 1.1 s) or decreases it (1.0 -> 0.9 s).
 # 4. Start/stop the pump - you can manually start the pump whenever you want. Hold the button down for a few seconds to do it.
+#  The pump will run as long as you have set the running time, and then automatically turn off (the text "pump on" will change to "pump off")
 
-# Push button once to change the option and hold it down to change the values.
+# Push the button once to change the option. Hold it down for three seconds to change the values.
 
 # The welcome screen shows a little animation and soil moisture and 2 mins average moisture.
+# The moisture values should be between 0...100.
 # When you run the program it will take 2 minutes before it shows the average moisture.
 
 
@@ -338,6 +341,7 @@ if __name__ == "__main__":
     soil_moisture = 0 # measured soil moisture
     soil_moisture_2min_avg = 0 # measured 2 min average soil moisture (average of 24 values)
     moisture_values = [] # an array which contains soil moisture measurements (max. 24)
+
     moisture_change_measuring_time = 0 # timestamp when it will measure the moisture again after running the pump
     moisture_avg_after_pumping = 0 # the moisture value after running the pump
     set_pump_run_time_to_1 = False # if the user sets pump running time to "auto", it will set the time to 1.0
@@ -417,11 +421,14 @@ if __name__ == "__main__":
                 moisture_change_measuring_time = 0
                 print("Stopped auto adjusting the pump running time")
             pump_turned_on = False
-            
+
+        # this measures the moisture after the pump has run.
+        # if the 2 min average moisture after pumping is more than the desired level, it will decrease the pump running time 0.1 s
+        # and if the 2 min average moisture after pumping is less than the desired level, it will increase the pump running time 0.1 s
         if moisture_change_measuring_time != 0 and time.ticks_ms() > moisture_change_measuring_time:
             moisture_avg_after_pumping = soil_moisture_2min_avg
             print("The avg moisture after pumping was " +str(moisture_avg_after_pumping))
-            if options[2].optionValue == 0 and moisture_avg_after_pumping > plant_1_moisture:
+            if options[2].optionValue == 0 and moisture_avg_after_pumping > plant_1_moisture and pump_run_time > 0.1:
                 pump_run_time -= 0.1 # auto adjust the pump running time
                 print("It's higher than " + str(plant_1_moisture) + " so auto adjusting the pump running time to be 0.1 seconds shorter")
             elif options[2].optionValue == 0 and moisture_avg_after_pumping < plant_1_moisture:

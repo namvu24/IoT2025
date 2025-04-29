@@ -14,6 +14,8 @@
 
 # Push the button once to change the option. Hold it down for three seconds to change the values.
 
+# If you don't change any options it will use default values. Default and min and max values are set in array "options"
+
 # The welcome screen shows a little animation and soil moisture and 2 mins average moisture.
 # The moisture values should be between 0...100.
 # When you run the program it will take 2 minutes before it shows the average moisture.
@@ -77,6 +79,7 @@ class Option:
         self.max_value = max_value
         self.threshold = threshold
 
+# Here: option name,  option DEFAULT VALUE,  first line of the option text,  second line of the option text,  is there automode or not,  on-text (for the pump),  off-text (for the pump),  option min value,  option max value,  threshold
 options = [ Option("MoistureLevel", 10, "Set soil", "moisture", False, "", "", 1, 100, 1), Option("Threshold", 9, "Set watering", "threshold", True, "", "", 0, 100, 1), Option("PumpRunTime", 0.5, "Set pump run", "time", True, "", "", 0.0, 6, 0.1), Option("PumpControl", 0, "Start/stop pump", "", False, "Pump on", "Pump off", 0, 0, 0) ]
 
 
@@ -333,7 +336,7 @@ if __name__ == "__main__":
         print("Unable to connect to MQTT")
         exit()
 
-    plant_1_moisture = 1 # the desired moisture level for the plant, can be set
+    plant_1_moisture = 10 # the desired moisture level for the plant, can be set
     plant_1_threshold = 9 # the threshold when the pump goes on
     pump_run_time = 0.5 # how long the pump will run
     pump_off_time = 0 # timestamp when the pump will be turned of automatically

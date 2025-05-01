@@ -31,8 +31,8 @@ import ujson
 import framebuf
 
 # WIFI CREDENTIALS
-SSID = "Leppaniitty-langaton"
-PASSWORD = "channel9001"
+SSID = "YOUR WIFI NAME"
+PASSWORD = "YOUR WIFI PASSWORD"
 
 # INIT CONSTANTS
 WIDTH = 128

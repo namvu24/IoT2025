@@ -21,7 +21,7 @@
 # When you run the program it will take 2 minutes before it shows the average moisture.
 
 
-from machine import Pin, I2C, ADC
+from machine import Pin, I2C, ADC, PWM
 from ssd1306 import SSD1306_I2C
 from umqtt.simple import MQTTClient
 import ssl

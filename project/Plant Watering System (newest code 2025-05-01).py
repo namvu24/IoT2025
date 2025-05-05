@@ -45,6 +45,13 @@ oled = SSD1306_I2C(WIDTH, HEIGHT, i2c)
 fbuf = framebuf.FrameBuffer(bytearray(WIDTH * HEIGHT * 1), WIDTH, HEIGHT, framebuf.MONO_VLSB)
 soil_sensor = ADC(Pin(28))
 button = Pin(15, Pin.IN, Pin.PULL_UP)
+ain1_pin = Pin(8, Pin.OUT)  # Example: GPIO 8
+ain2_pin = Pin(9, Pin.OUT)  # Example: GPIO 9
+pwm_a_pin = PWM(Pin(10))    # Example: GPIO 10 (PWM capable)
+stby_pin = Pin(7, Pin.OUT)  # Example: GPIO 7
+
+# Set PWM frequency
+pwm_a_pin.freq(1000)  # 1kHz PWM frequency
 
 # Azure IoT Hub Configuration
 MQTT_HOSTNAME = "broker.emqx.io"
@@ -403,19 +410,40 @@ def get_moisture_2min_avg(soil_moisture_values):
     else:
         return sum(soil_moisture_values) / len(soil_moisture_values) # return average of 24 measurements
 
+# Set up pump
+def setup_pump():
+    """
+    Sets up the pin modes and initializes the motor driver.
+    """
+    pwm_a_pin.freq(1000)  # 1kHz PWM frequency
+    ain1_pin.init(Pin.OUT)
+    ain2_pin.init(Pin.OUT)
+    # pwm_a_pin is already set as PWM in the global definition
+    stby_pin.init(Pin.OUT)
+
+    # Enable the motor driver (take it out of standby)
+    stby_pin.value(1)  # Set STBY HIGH
+
 
 # Function to start the pump
 def start_pump(start_type): # start_type (string) = "(MANUALLY)" or "(AUTOMATICALLY)" (to write the text to the console)
     print("\n\n*************\n\nSTART THE PUMP " + str(time.time()) + "" + start_type)
     
     # WE NEED CODE HERE TO START THE PUMP!
+    ain1_pin.value(1)
+    ain2_pin.value(0)
+
+    # Set a constant speed (e.g., 75%)
+    pwm_a_pin.duty_u16(int(0.2 * 65535))  # 20% speed
 
 # Function to stop the pump
 def stop_pump():
     print("\nSTOP THE PUMP " + str(time.time()) + "\n\n*************\n\n")
     
-    # WE NEED CODE HERE TO STOP THE PUMP!
-
+    # CODE HERE TO STOP THE PUMP!
+    ain1_pin.value(0)
+    ain2_pin.value(0)
+    pwm_a_pin.duty_u16(0)
 
 # Drawing fbuf on OLED display
 def draw_on_oled(fbuf, stop_flashing):
@@ -439,6 +467,7 @@ if __name__ == "__main__":
     stop_flashing = time.ticks_ms() + 1000
     wlan = connect_wlan()
     mqtt_client = connect_mqtt()
+    setup_pump()
     
     time.sleep(1)
     

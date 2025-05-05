@@ -393,6 +393,7 @@ def get_moisture():
     adc_water = 24000
     raw_value = soil_sensor.read_u16()
     moisture_percent = ((adc_air - raw_value)/(adc_air - adc_water)) * 100
+    # moisture_percent = (raw_value - adc_air) / (adc_water - adc_air) * 100
     # THESE VALUES SHOULD BE BETWEEN 0 AND 100!!!
     return round(moisture_percent, 2)
 
